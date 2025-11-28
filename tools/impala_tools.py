@@ -11,30 +11,13 @@
 import json
 import os
 from impala.dbapi import connect
+import cml.data_v1 as cmldata
+
+CONNECTION_NAME = "Base-Lab - Impala"
 
 # Helper to get Impala connection details from env vars
 def get_db_connection():
-    host = os.getenv("IMPALA_HOST", "coordinator-default-impala.example.com")
-    port = int(os.getenv("IMPALA_PORT", "443"))
-    user = os.getenv("IMPALA_USER", "username")
-    password = os.getenv("IMPALA_PASSWORD", "password")
-    database = os.getenv("IMPALA_DATABASE", "default")
-    auth_mechanism = os.getenv("IMPALA_AUTH_MECHANISM", "LDAP")
-    use_http_transport = os.getenv("IMPALA_USE_HTTP_TRANSPORT", "true")
-    http_path = os.getenv("IMPALA_HTTP_PATH", "cliservice")
-    use_ssl = os.getenv("IMPALA_USE_SSL", "true")
-
-    return connect(
-        host=host,
-        port=port,
-        user=user,
-        password=password,
-        database=database,
-        auth_mechanism=auth_mechanism,
-        use_http_transport=use_http_transport,
-        http_path=http_path,
-        use_ssl=use_ssl,
-    )
+    return cmldata.get_connection(CONNECTION_NAME)
 
 def execute_query(query: str) -> str:
     conn = None
@@ -49,7 +32,7 @@ def execute_query(query: str) -> str:
 
     try:
         conn = get_db_connection()
-        cur = conn.cursor()
+        cur = conn.get_cursor()
         cur.execute(query)
         if cur.description:
             rows = cur.fetchall()
@@ -65,11 +48,12 @@ def execute_query(query: str) -> str:
         if conn:
             conn.close()
 
-def get_schema() -> str:
+def get_schema(database: str) -> str:
     conn = None
     try:
         conn = get_db_connection()
-        cur = conn.cursor()
+        cur = conn.get_cursor()
+        cur.execute("use "+database)
         cur.execute("SHOW TABLES")
         tables = cur.fetchall()
         schema = [table[0] for table in tables]
