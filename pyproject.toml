@@ -1,22 +1,32 @@
-[build-system]
-requires = ["setuptools>=45", "wheel"]
-build-backend = "setuptools.build_meta"
-
 [project]
 name = "iceberg-mcp-server"
 version = "0.1.0"
-description = "Cloudera Iceberg MCP Server via Impala"
+description = "Cloudera AI Workbench MCP server via Impala/Iceberg"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+
+authors = [
+  { name = "Paul Abdallah Aida", email = "you@example.com" }
+]
+
 dependencies = [
-    "impyla>=0.21.0",
-    "mcp[cli]>=1.6.0",
-    "python-dotenv>=1.1.0",
+  "mcp>=0.1.0",
+  "python-dotenv>=1.0.0",
+  "impyla>=0.19.0"   # or whatever driver you actually use
 ]
 
 [project.scripts]
-iceberg-mcp-server = "server:main"
+# This is the CLI name uvx will run:
+# uvx --from git+... cai-workbench-mcp-stdio
+cai-workbench-mcp-stdio = "cai_workbench_mcp.server:main"
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["tools"]
-py-modules = ["server"]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
